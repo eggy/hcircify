@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="include\hexchat-plugin.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SpotifyLookupApi.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gitversion.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{857236cf-b054-49c3-b60d-30c65cbfa236}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{59f80581-2864-44d4-b36e-a20354e19272}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="misc">
+      <UniqueIdentifier>{3a275c38-6b05-403b-87e0-ef44082d2313}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\spotify.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\spotify.def">
+      <Filter>src</Filter>
+    </None>
+    <None Include="prebuild.bat">
+      <Filter>misc</Filter>
+    </None>
+    <None Include="Readme.txt">
+      <Filter>misc</Filter>
+    </None>
+    <None Include="TODO.txt">
+      <Filter>misc</Filter>
+    </None>
+    <None Include="addon_hcircify.conf">
+      <Filter>misc</Filter>
+    </None>
+  </ItemGroup>
+</Project>
