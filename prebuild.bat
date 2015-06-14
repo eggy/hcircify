@@ -7,5 +7,5 @@ set /p result2=<post.tmp
 set timestamp=%DATE:/=-%@%TIME::=-%
 set timestamp=%timestamp: =%
 
-echo char GitStr[] ="%result%-%timestamp%"; > include/gitversion.h
+echo char GitStr[] ="%result%-%timestamp%"; > src/gitversion.h
 del post.tmp

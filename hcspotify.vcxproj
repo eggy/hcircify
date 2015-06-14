@@ -108,19 +108,21 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\gitversion.h" />
-    <ClInclude Include="include\hexchat-plugin.h" />
-    <ClInclude Include="include\SpotifyLookupApi.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="src\spotify.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="addon_hcircify.conf" />
+    <None Include="docs\addon_hcircify.conf" />
+    <None Include="docs\Readme.txt" />
+    <None Include="docs\TODO.md" />
     <None Include="prebuild.bat" />
-    <None Include="Readme.txt" />
+    <None Include="README.md" />
     <None Include="src\spotify.def" />
-    <None Include="TODO.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\gitversion.h" />
+    <ClInclude Include="src\hexchat-plugin.h" />
+    <ClInclude Include="src\Spotify.h" />
+    <ClInclude Include="src\SpotifyLookupApi.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
