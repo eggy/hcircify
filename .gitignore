@@ -191,5 +191,5 @@ ModelManifest.xml
 # LightSwitch generated files
 tmp/
 lib/*
-include/gitversion.h
+src/gitversion.h
 .bashrc
