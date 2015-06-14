@@ -1,6 +1,7 @@
 ﻿/*
   hcircify - Spotify Now Playing plugin for HexChat
-  Copyright (C) 2015  M. Richards / eggy.cc
+  
+  Copyright (C) 2015  M. Richards
   Copyright (C) 2014  K. Leonardsen / Equalify.me
 
   This program is free software: you can redistribute it and/or modify
@@ -19,31 +20,10 @@
   Contact info: mrichards@gmail.com
 */
 
-#include <windows.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <time.h>
-#include <string>
-#include "SpotifyLookupApi.h"
-#include "hexchat-plugin.h"
-#include "gitversion.h"
-
-#define IRCIFY_CMD "IRCIFY"
-#define APIV_CMD "APIV"
-#define SAVE_CMD "OUTPUT"
-#define PREF_OUTPUT "Output"
-#define PREF_MSG "Type"
-
-#ifdef _WIN64
-#pragma comment(lib, "./lib/SpotifyLookUpAPI_x64.lib")
-#else
-#pragma comment(lib, "./lib/SpotifyLookUpAPI.lib")
-#endif
+#include "Spotify.h"
 
 static hexchat_plugin *ph;   /* plugin handle */
 static char name[] = "hcircify";
-//static char name[] = "Ircify - Spotify Now Playing";
 static char desc[] = "Sends currently playing song in Spotify to the current channel.";
 static char version[] = "1.0.1";
 static const char helpmsg[] = "Sends currently playing song in Spotify to the current channel. USAGE: /IRCIFY";
@@ -57,6 +37,155 @@ static char	SavedOutputStr[500] = { 0 };
 static char	ColorSaveStr[500] = { 0 };
 static char PrefOut[500] = { 0 };
 static int usemsg = 1;
+
+static int spotify_cb(char *word[], char *word_eol[], void *userdata)
+{
+	HWND hWnd = FindWindow(SPOTIFY_CLASS_NAME, NULL);
+	if(hWnd != NULL)
+	{
+		TRACKINFO ti = { 0 };
+		memset(&ti, 0, sizeof(TRACKINFO)); //make sure its nulled every time!
+		
+		int sngnfo = GetSongInfo(&ti, 1);
+		if (sngnfo == -1){
+			return 1;
+		}
+		if (ti.tracktype == 2) return 1;
+		if (sngnfo == -5) {				// -5 = private session, which means no data to gather.. so get the titlebar instead..
+			proc_color(input, 0);
+			internalsong(&ti);
+			CreateOutput(ColorSaveStr, &ti);
+			OutputToIRC(SavedOutputStr);
+			return 3;
+		}
+		if ((ti.tracktype == 0) || (ti.tracktype == 1) || (ti.SpInfo.Playing == 1)) {
+			proc_color(input, 0);
+			CreateOutput(ColorSaveStr, &ti);
+			OutputToIRC(SavedOutputStr);
+		}
+ 	}
+	else
+	{
+		hexchat_printf(ph, "%s: Unable to find Spotify window.", name);
+	}
+	return HEXCHAT_EAT_ALL;
+}
+
+static int advert_ver(char *word[], char *word_eol[], void *userdata){
+	
+	if (usemsg == 0)
+		hexchat_commandf(ph, "me is using %s - Spotify for HexChat (Lib:%x-DLL:%s) - Get yours at http://equalify.me/ircify/", name, api, GitStr);
+	else if (usemsg == 1)
+		hexchat_commandf(ph, "say %s - Spotify for HexChat (Lib:%x-DLL:%s) - Get yours at http://equalify.me/ircify/", name, api, GitStr);
+	else
+		hexchat_printf(ph, "%s: Lib:%x-DLL:%s", name, api, GitStr);
+	return HEXCHAT_EAT_ALL;
+}
+
+static int output_cb(char *word[], char *word_eol[], void *userdata)
+{
+	int usesave = 1;
+
+	if (!_stricmp("RELOAD", word[2])) {
+		usesave = 0;
+	}
+	else if (!_stricmp("CONFIG", word[2])) {
+		hexchat_printf(ph, "%s: %s\\addon_hcircify.conf", name, hexchat_get_info(ph, "configdir"));
+		return 1;
+	} else if (!_stricmp("SET", word[2])) {
+		usesave = 2;
+		sprintf_s(input, 500, word_eol[3]);
+	} else if (!_stricmp("TYPE", word[2])) {
+		usesave = 2;
+		if (!_stricmp("1", word[3])){
+			usemsg = 1;
+			hexchat_printf(ph, "%s: Message type set 1, using \"/say\".", name);
+		} else {
+			usemsg = 0;
+			hexchat_printf(ph, "%s: Message type set 0, using \"/me\".", name);
+		}
+	} else if (!_stricmp("SAVE", word[2])) {
+		usesave = 1;
+		proc_color(input, 1);
+		LoadAndSave(usesave);
+		hexchat_printf(ph, "%s: Wrote all settings to the config.", name);
+		return 1;	
+	} else {
+		//Output command help
+		hexchat_printf(ph, "%s: OUTPUT COMMAND USAGE:", name);
+		hexchat_printf(ph, "%s: /OUTPUT SAVE", name);
+		hexchat_printf(ph, "%s: /OUTPUT RELOAD", name);
+		hexchat_printf(ph, "%s: /OUTPUT CONFIG", name);
+		hexchat_printf(ph, "%s: /OUTPUT SET <Output>", name);
+		hexchat_printf(ph, "%s: /OUTPUT TYPE <0 or 1>", name);
+		hexchat_printf(ph, "%s: Any modified settings will be automatically be saved upon unlaod/exit.", name);
+		return 1;
+	}
+
+	if (usesave == 0)	{
+		//Reload the preferences from the config
+		LoadAndSave(usesave);
+		hexchat_printf(ph, "%s: Reloaded settings from the config.", name);
+		return 1;
+	} else if (usesave == 1) {
+		//Save the preferences to config
+		LoadAndSave(usesave);
+		hexchat_printf(ph, "%s: Wrote all settings to the config.", name);
+		return 1;
+	 } else {
+		//Preferences changed, but not written to config
+		hexchat_printf(ph, "%s: Settings have been altered in memory but not saved yet.", name);
+		hexchat_printf(ph, "%s: Settings are auto saved on unlaod or exit.", name);
+		hexchat_printf(ph, "%s: You can always manually save by using /OUTPUT SAVE", name);
+		return 1;
+	}
+	return 1;
+}
+
+void hexchat_plugin_get_info(char **plugin_name, char **plugin_desc, char **plugin_version, void **reserved) {
+	*plugin_name = name;
+	*plugin_desc = desc;
+	*plugin_version = version;
+	(void)reserved;
+}
+
+int hexchat_plugin_init(hexchat_plugin *plugin_handle, char **plugin_name, char **plugin_desc, char **plugin_version, char *arg)
+{
+	/* we need to save this for use with any hexchat_* functions */
+	ph = plugin_handle;
+
+	/* tell HexChat our info */
+	*plugin_name = name;
+	*plugin_desc = desc;
+	*plugin_version = version;
+
+	hexchat_hook_command(ph, IRCIFY_CMD, HEXCHAT_PRI_NORM, spotify_cb, helpmsg, 0);
+	hexchat_hook_command(ph, APIV_CMD, HEXCHAT_PRI_NORM, advert_ver, apihelpmsg, 0);
+	hexchat_hook_command(ph, SAVE_CMD, HEXCHAT_PRI_NORM, output_cb, prefhpmsg, 0);
+
+	LoadAndSave(0);
+
+	hexchat_command(ph, "MENU ADD \"Ircify\"");
+	hexchat_command(ph, "MENU ADD \"Ircify/Ircify\" \"IRCIFY\"");
+	hexchat_command(ph, "MENU ADD \"Ircify/-");
+	hexchat_command(ph, "MENU ADD \"Ircify/About\" \"APIV\"");
+
+	hexchat_printf(ph, "%s: Lib:%x-DLL:%s loaded.\n", name, api, GitStr);
+
+	return 1;	/* return 1 for success */
+}
+
+int hexchat_plugin_deinit(hexchat_plugin *plugin_handle)
+{
+	ph = plugin_handle;
+
+	LoadAndSave(1);
+	
+	hexchat_command(ph, "MENU DEL \"Ircify\"");
+	hexchat_printf(ph, "%s: Lib:%x-DLL:%s unloaded.\n", name, api, GitStr);
+
+	return 1;
+}
 
 char* _UTF16ToUTF8(wchar_t * pszTextUTF16){
 	if ((pszTextUTF16 == NULL) || (*pszTextUTF16 == L'\0')) {
@@ -126,9 +255,9 @@ int proc_color(char *color, int reverse)
 	sprintf_s(colorstr, 600, color);
 	std::string ColorData;
 	ColorData = colorstr;
-	
+
 	if (!reverse)
-	{ 	
+	{
 		while (ColorData.find("^B") != std::string::npos) {
 			ColorData.replace(ColorData.find("^B"), 2, "\002");
 		}
@@ -315,10 +444,9 @@ int CreateOutput(char *out, TRACKINFO *ti)
 	return 1;
 }
 
-int LoadAndSave(hexchat_plugin *plugin_handle, int saved) {
+int LoadAndSave(int saved) {
 	//Loading and Saving to and from the plugin config
 	// 0 = Load, 1 = Save
-	ph = plugin_handle;
 	char buf[500] = { 0 };
 	int prefmsg = 0;
 
@@ -345,7 +473,6 @@ int LoadAndSave(hexchat_plugin *plugin_handle, int saved) {
 			usemsg = 1;
 			hexchat_printf(ph, "%s: Message type set to 1, using \"say\" by default.", name);
 		}
-		//hexchat_printf(ph, "%s: Loading settings from the config.", name);
 		return 1;
 	}
 	else {
@@ -362,162 +489,8 @@ int LoadAndSave(hexchat_plugin *plugin_handle, int saved) {
 			hexchat_printf(ph, "%s: failed to save settings", name);
 			return 0;
 		}
-		//hexchat_printf(ph, "%s: Saved settings to the config.", name);
 		return 1;
 	}
 	hexchat_printf(ph, "%s: Something went wrong with saving or loading.", name);
 	return 0;
 }
-
-static int spotify_cb(char *word[], char *word_eol[], void *userdata)
-{
-	HWND hWnd = FindWindow(SPOTIFY_CLASS_NAME, NULL);
-	if(hWnd != NULL)
-	{
-		TRACKINFO ti = { 0 };
-		memset(&ti, 0, sizeof(TRACKINFO)); //make sure its nulled every time!
-		
-		int sngnfo = GetSongInfo(&ti, 1);
-		if (sngnfo == -1){
-			return 1;
-		}
-		if (ti.tracktype == 2) return 1;
-		if (sngnfo == -5) {				// -5 = private session, which means no data to gather.. so get the titlebar instead..
-			internalsong(&ti);
-			proc_color(input, 0);
-			CreateOutput(ColorSaveStr, &ti);
-			OutputToIRC(SavedOutputStr);
-			return 3;
-		}
-		if ((ti.tracktype == 0) || (ti.tracktype == 1) || (ti.SpInfo.Playing == 1)) {
-			proc_color(input, 0);
-			CreateOutput(ColorSaveStr, &ti);
-			OutputToIRC(SavedOutputStr);
-		}
-
-		/*if ((ti.SpInfo.Playing == 0)) {
-			hexchat_print(ph, "Spotify is not playing anything right now.");
-		}*/
- 	}
-	else
-	{
-		hexchat_printf(ph, "%s: Unable to find Spotify window.", name);
-	}
-	return HEXCHAT_EAT_ALL;
-}
-
-static int advert_ver(char *word[], char *word_eol[], void *userdata){
-	
-	if (usemsg == 0)
-		hexchat_commandf(ph, "me is using %s - Spotify for HexChat (Lib:%x-DLL:%s) - Get yours at http://equalify.me/ircify/", name, api, GitStr);
-	else if (usemsg == 1)
-		hexchat_commandf(ph, "say %s - Spotify for HexChat (Lib:%x-DLL:%s) - Get yours at http://equalify.me/ircify/", name, api, GitStr);
-	else
-		hexchat_printf(ph, "%s: Lib:%x-DLL:%s", name, api, GitStr);
-	return HEXCHAT_EAT_ALL;
-}
-
-static int output_cb(char *word[], char *word_eol[], void *userdata)
-{
-	int usesave = 1;
-
-	if (!_stricmp("RELOAD", word[2])) {
-		usesave = 0;
-	}
-	else if (!_stricmp("CONFIG", word[2])) {
-		hexchat_printf(ph, "%s: %s\\addon_hcircify.conf", name, hexchat_get_info(ph, "configdir"));
-		return 1;
-	} else if (!_stricmp("SET", word[2])) {
-		usesave = 2;
-		sprintf_s(input, 500, word_eol[3]);
-	} else if (!_stricmp("TYPE", word[2])) {
-		usesave = 2;
-		if (!_stricmp("1", word[3])){
-			usemsg = 1;
-			hexchat_printf(ph, "%s: Message type set 1, using \"/say\".", name);
-		} else {
-			usemsg = 0;
-			hexchat_printf(ph, "%s: Message type set 0, using \"/me\".", name);
-		}
-	} else if (!_stricmp("SAVE", word[2])) {
-		usesave = 1;
-		proc_color(input, 1);
-		LoadAndSave(ph, usesave);
-		hexchat_printf(ph, "%s: Wrote all settings to the config.", name);
-		return 1;	
-	} else {
-		//Output command help
-		hexchat_printf(ph, "%s: OUTPUT COMMAND USAGE:", name);
-		hexchat_printf(ph, "%s: /OUTPUT SAVE", name);
-		hexchat_printf(ph, "%s: /OUTPUT RELOAD", name);
-		hexchat_printf(ph, "%s: /OUTPUT CONFIG", name);
-		hexchat_printf(ph, "%s: /OUTPUT SET <Output>", name);
-		hexchat_printf(ph, "%s: /OUTPUT TYPE <0 or 1>", name);
-		hexchat_printf(ph, "%s: Any modified settings will be automatically be saved upon unlaod/exit.", name);
-		return 1;
-	}
-
-	if (usesave == 0)	{
-		//Reload the preferences from the config
-		LoadAndSave(ph, usesave);
-		hexchat_printf(ph, "%s: Reloaded settings from the config.", name);
-		return 1;
-	} else if (usesave == 1) {
-		//Save the preferences to config
-		LoadAndSave(ph, usesave);
-		hexchat_printf(ph, "%s: Wrote all settings to the config.", name);
-		return 1;
-	 } else {
-		//Preferences changed, but not written to config
-		hexchat_printf(ph, "%s: Settings have been changed, but not saved yet.", name);
-		hexchat_printf(ph, "%s: Settings are saved on unlaod/exit. You can always manually save by using /OUTPUT SAVE", name);
-		return 1;
-	}
-	return 1;
-}
-
-void hexchat_plugin_get_info(char **plugin_name, char **plugin_desc, char **plugin_version, void **reserved) {
-	*plugin_name = name;
-	*plugin_desc = desc;
-	*plugin_version = version;
-	(void)reserved;
-}
-
-int hexchat_plugin_init(hexchat_plugin *plugin_handle, char **plugin_name, char **plugin_desc, char **plugin_version, char *arg)
-{
-	/* we need to save this for use with any hexchat_* functions */
-	ph = plugin_handle;
-
-	/* tell HexChat our info */
-	*plugin_name = name;
-	*plugin_desc = desc;
-	*plugin_version = version;
-
-	hexchat_hook_command(ph, IRCIFY_CMD, HEXCHAT_PRI_NORM, spotify_cb, helpmsg, 0);
-	hexchat_hook_command(ph, APIV_CMD, HEXCHAT_PRI_NORM, advert_ver, apihelpmsg, 0);
-	hexchat_hook_command(ph, SAVE_CMD, HEXCHAT_PRI_NORM, output_cb, prefhpmsg, 0);
-
-	LoadAndSave(ph, 0);
-
-	hexchat_command(ph, "MENU ADD \"Ircify\"");
-	hexchat_command(ph, "MENU ADD \"Ircify/Ircify\" \"IRCIFY\"");
-	hexchat_command(ph, "MENU ADD \"Ircify/-");
-	hexchat_command(ph, "MENU ADD \"Ircify/About\" \"APIV\"");
-
-	hexchat_printf(ph, "%s: Lib:%x-DLL:%s loaded.\n", name, api, GitStr);
-
-	return 1;	/* return 1 for success */
-}
-
-int hexchat_plugin_deinit(hexchat_plugin *plugin_handle)
-{
-	ph = plugin_handle;
-
-	LoadAndSave(ph, 1);
-	
-	hexchat_command(ph, "MENU DEL \"Ircify\"");
-	hexchat_printf(ph, "%s: Lib:%x-DLL:%s unloaded.\n", name, api, GitStr);
-
-	return 1;
-}
-
