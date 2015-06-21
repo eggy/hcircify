@@ -22,4 +22,6 @@ echo static const char BuildNumber[] = "%build%"; >> src/gitversion.h
 echo #define VER_BUILD %build% >> src/gitversion.h
 echo #define VER_HASH "%result%"  >> src/gitversion.h
 echo #define VER_GITSTR  "%result%.%result2%"  >> src/gitversion.h
+
+echo %build% > BUILD.TXT
 del post.tmp
