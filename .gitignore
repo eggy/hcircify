@@ -194,3 +194,5 @@ lib/*
 src/gitversion.h
 .bashrc
 BUILD.txt
+*.zip
+package.bat

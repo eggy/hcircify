@@ -47,14 +47,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>hcircify</TargetName>
-    <OutDir>bin</OutDir>
-    <IntDir>tmp\x86</IntDir>
+    <OutDir>bin\</OutDir>
+    <IntDir>tmp\x86\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>hcircify_x64</TargetName>
-    <OutDir>bin</OutDir>
-    <IntDir>tmp\x64</IntDir>
+    <OutDir>bin\</OutDir>
+    <IntDir>tmp\x64\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>

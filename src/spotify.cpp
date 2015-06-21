@@ -170,7 +170,7 @@ int hexchat_plugin_init(hexchat_plugin *plugin_handle, char **plugin_name, char 
 	hexchat_command(ph, "MENU ADD \"Ircify/-");
 	hexchat_command(ph, "MENU ADD \"Ircify/About\" \"APIV\"");
 
-	hexchat_printf(ph, "%s v%s (Lib:%x-DLL:%s-%s) loaded.\n", name, version, api, GitHash, BuildDate);
+	hexchat_printf(ph, "%s v%s (Lib:%x-DLL:%s-%s) loaded", name, version, api, GitHash, BuildDate);
 
 	return 1;	/* return 1 for success */
 }
@@ -182,7 +182,7 @@ int hexchat_plugin_deinit(hexchat_plugin *plugin_handle)
 	LoadAndSave(1);
 	
 	hexchat_command(ph, "MENU DEL \"Ircify\"");
-	hexchat_printf(ph, "%s v%s (Lib:%x-DLL:%s-%s) unloaded.\n", name, version, api, GitHash, BuildDate);
+	hexchat_printf(ph, "%s v%s (Lib:%x-DLL:%s-%s) unloaded", name, version, api, GitHash, BuildDate);
 
 	return 1;
 }
