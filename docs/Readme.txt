@@ -65,7 +65,6 @@ Available tags in the output customizer:
 
 3. CHAGELOG
 ===============
-v1.0.2 - Maintenance Release
 v1.0.1 - Fixed Private Mode
 v1.0 - Public Release
 v0.1 - Private Beta Build
