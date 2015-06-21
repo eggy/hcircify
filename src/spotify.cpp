@@ -73,17 +73,12 @@ static int spotify_cb(char *word[], char *word_eol[], void *userdata)
 }
 
 static int advert_ver(char *word[], char *word_eol[], void *userdata){
-	char OutVer[] = "";
-	strcpy_s(OutVer, GitHash);
-	strcat_s(OutVer, "-");
-	strcat_s(OutVer, BuildDate);
-
 	if (usemsg == 0)
-		hexchat_commandf(ph, "me is using %s v%s (Lib:%x-DLL:%s) - Get yours at http://equalify.me/ircify/", name, version, api, OutVer);
+		hexchat_commandf(ph, "me is using %s v%s (Lib:%x-DLL:%s-%s) - Get yours at http://equalify.me/ircify/", name, version, api, GitHash, BuildDate);
 	else if (usemsg == 1)
-		hexchat_commandf(ph, "say %s v%s (Lib:%x-DLL:%s) - Get yours at http://equalify.me/ircify/", name, version, api, OutVer);
+		hexchat_commandf(ph, "say %s v%s (Lib:%x-DLL:%s-%s) - Get yours at http://equalify.me/ircify/", name, version, api, GitHash, BuildDate);
 	else
-		hexchat_printf(ph, "%s v%s Lib:%x-DLL:%s", name, version, api, OutVer);
+		hexchat_printf(ph, "%s v%s Lib:%x-DLL:%s-%s", name, version, api, GitHash, BuildDate);
 	return HEXCHAT_EAT_ALL;
 }
 
@@ -175,7 +170,7 @@ int hexchat_plugin_init(hexchat_plugin *plugin_handle, char **plugin_name, char 
 	hexchat_command(ph, "MENU ADD \"Ircify/-");
 	hexchat_command(ph, "MENU ADD \"Ircify/About\" \"APIV\"");
 
-	hexchat_printf(ph, "%s v%s loaded.\n", name, version);
+	hexchat_printf(ph, "%s v%s (Lib:%x-DLL:%s-%s) loaded.\n", name, version, api, GitHash, BuildDate);
 
 	return 1;	/* return 1 for success */
 }
@@ -187,7 +182,7 @@ int hexchat_plugin_deinit(hexchat_plugin *plugin_handle)
 	LoadAndSave(1);
 	
 	hexchat_command(ph, "MENU DEL \"Ircify\"");
-	hexchat_printf(ph, "%s v%s unloaded.\n", name, version);
+	hexchat_printf(ph, "%s v%s (Lib:%x-DLL:%s-%s) unloaded.\n", name, version, api, GitHash, BuildDate);
 
 	return 1;
 }
