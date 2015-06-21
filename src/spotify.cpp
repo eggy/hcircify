@@ -74,9 +74,9 @@ static int spotify_cb(char *word[], char *word_eol[], void *userdata)
 
 static int advert_ver(char *word[], char *word_eol[], void *userdata){
 	char OutVer[] = "";
-	strcpy(OutVer, GitHash);
-	strcat(OutVer, "-");
-	strcat(OutVer, BuildDate);
+	strcpy_s(OutVer, GitHash);
+	strcat_s(OutVer, "-");
+	strcat_s(OutVer, BuildDate);
 
 	if (usemsg == 0)
 		hexchat_commandf(ph, "me is using %s v%s (Lib:%x-DLL:%s) - Get yours at http://equalify.me/ircify/", name, version, api, OutVer);
@@ -183,10 +183,6 @@ int hexchat_plugin_init(hexchat_plugin *plugin_handle, char **plugin_name, char 
 int hexchat_plugin_deinit(hexchat_plugin *plugin_handle)
 {
 	ph = plugin_handle;
-	char OutVer[] = "";
-	strcpy(OutVer, GitHash);
-	strcat(OutVer, "-");
-	strcat(OutVer, BuildDate);
 
 	LoadAndSave(1);
 	
