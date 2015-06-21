@@ -23,9 +23,10 @@
 #include "Spotify.h"
 
 static hexchat_plugin *ph;   /* plugin handle */
-static char name[] = "hcircify";
-static char desc[] = "Sends currently playing song in Spotify to the current channel.";
-static char version[] = "1.0.1";
+static char name[] = VER_INTERNAL_NAME_STR;
+static char desc[] = VER_FILE_DESCRIPTION_STR;
+static char version[] = VER_FILE_VERSION_STR;
+
 static const char helpmsg[] = "Sends currently playing song in Spotify to the current channel. USAGE: /IRCIFY";
 static const char apihelpmsg[] = "Display hcircify version information. USAGE: /APIV";
 static const char prefhpmsg[] = "Configure hcircify output. USAGE: /OUTPUT";
@@ -72,13 +73,17 @@ static int spotify_cb(char *word[], char *word_eol[], void *userdata)
 }
 
 static int advert_ver(char *word[], char *word_eol[], void *userdata){
-	
+	char OutVer[] = "";
+	strcpy(OutVer, GitHash);
+	strcat(OutVer, "-");
+	strcat(OutVer, BuildDate);
+
 	if (usemsg == 0)
-		hexchat_commandf(ph, "me is using %s - Spotify for HexChat (Lib:%x-DLL:%s) - Get yours at http://equalify.me/ircify/", name, api, GitStr);
+		hexchat_commandf(ph, "me is using %s v%s (Lib:%x-DLL:%s) - Get yours at http://equalify.me/ircify/", name, version, api, OutVer);
 	else if (usemsg == 1)
-		hexchat_commandf(ph, "say %s - Spotify for HexChat (Lib:%x-DLL:%s) - Get yours at http://equalify.me/ircify/", name, api, GitStr);
+		hexchat_commandf(ph, "say %s v%s (Lib:%x-DLL:%s) - Get yours at http://equalify.me/ircify/", name, version, api, OutVer);
 	else
-		hexchat_printf(ph, "%s: Lib:%x-DLL:%s", name, api, GitStr);
+		hexchat_printf(ph, "%s v%s Lib:%x-DLL:%s", name, version, api, OutVer);
 	return HEXCHAT_EAT_ALL;
 }
 
@@ -170,7 +175,7 @@ int hexchat_plugin_init(hexchat_plugin *plugin_handle, char **plugin_name, char 
 	hexchat_command(ph, "MENU ADD \"Ircify/-");
 	hexchat_command(ph, "MENU ADD \"Ircify/About\" \"APIV\"");
 
-	hexchat_printf(ph, "%s: Lib:%x-DLL:%s loaded.\n", name, api, GitStr);
+	hexchat_printf(ph, "%s v%s loaded.\n", name, version);
 
 	return 1;	/* return 1 for success */
 }
@@ -178,11 +183,15 @@ int hexchat_plugin_init(hexchat_plugin *plugin_handle, char **plugin_name, char 
 int hexchat_plugin_deinit(hexchat_plugin *plugin_handle)
 {
 	ph = plugin_handle;
+	char OutVer[] = "";
+	strcpy(OutVer, GitHash);
+	strcat(OutVer, "-");
+	strcat(OutVer, BuildDate);
 
 	LoadAndSave(1);
 	
 	hexchat_command(ph, "MENU DEL \"Ircify\"");
-	hexchat_printf(ph, "%s: Lib:%x-DLL:%s unloaded.\n", name, api, GitStr);
+	hexchat_printf(ph, "%s v%s unloaded.\n", name, version);
 
 	return 1;
 }

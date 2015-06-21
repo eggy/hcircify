@@ -81,6 +81,9 @@
     <PreBuildEvent>
       <Command>prebuild.bat</Command>
     </PreBuildEvent>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>src;</AdditionalIncludeDirectories>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -121,8 +124,13 @@
   <ItemGroup>
     <ClInclude Include="src\gitversion.h" />
     <ClInclude Include="src\hexchat-plugin.h" />
+    <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\Spotify.h" />
     <ClInclude Include="src\SpotifyLookupApi.h" />
+    <ClInclude Include="src\version.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\hcspotify.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -37,9 +37,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\gitversion.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="src\hexchat-plugin.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -49,5 +46,19 @@
     <ClInclude Include="src\SpotifyLookupApi.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\gitversion.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resource.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\version.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\hcspotify.rc">
+      <Filter>src</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
