@@ -187,7 +187,7 @@ int hexchat_plugin_deinit(hexchat_plugin *plugin_handle)
 	return 1;
 }
 
-int OutputToIRC(char *out)/ {
+int OutputToIRC(char *out) {
 	char *irc;
 	std::string ChanModes;
 	const char *cmodes = hexchat_get_info(ph, "modes");
