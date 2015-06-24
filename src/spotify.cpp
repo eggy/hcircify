@@ -188,9 +188,15 @@ int hexchat_plugin_deinit(hexchat_plugin *plugin_handle)
 }
 
 int OutputToIRC(char *out) {
+
 	char *stripped;
 	std::string ChanModes;
-	ChanModes = hexchat_get_info(ph, "modes");
+	const char *cmodes = hexchat_get_info(ph, "modes");
+
+	if (cmodes != NULL)
+		ChanModes = cmodes;
+	else
+		ChanModes = "";
 
 	if (ChanModes.find("c") != std::string::npos) {
 		stripped = hexchat_strip(ph, out, -1, 1 | 2);
