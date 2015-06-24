@@ -187,41 +187,38 @@ int hexchat_plugin_deinit(hexchat_plugin *plugin_handle)
 	return 1;
 }
 
-int OutputToIRC(char *out) {
-
-	char *stripped;
+int OutputToIRC(char *out)/ {
+	char *irc;
 	std::string ChanModes;
 	const char *cmodes = hexchat_get_info(ph, "modes");
 
 	if (cmodes != NULL)
 		ChanModes = cmodes;
-	else
-		ChanModes = "";
 
-	if (ChanModes.find("c") != std::string::npos) {
-		stripped = hexchat_strip(ph, out, -1, 1 | 2);
-
-		if (usemsg == 0) {
-			hexchat_commandf(ph, "me %s", stripped);
-		}
-		else if (usemsg == 1) {
-			hexchat_commandf(ph, "say %s", stripped);
+		if (ChanModes.find("c") != std::string::npos) {
+			char *stripped = hexchat_strip(ph, out, -1, 1 | 2);
+			if (stripped != NULL) {
+				irc = stripped;
+			}
+			else
+			{
+				irc = out;
+			}
+				
+			hexchat_free(ph, stripped);
 		}
 		else {
-			hexchat_printf(ph, "Output: %s\n", stripped);
+			irc = out;
 		}
-		hexchat_free(ph, stripped);
+
+	if (usemsg == 0) {
+		hexchat_commandf(ph, "me %s", irc);
+		}
+	else if (usemsg == 1) {
+		hexchat_commandf(ph, "say %s", irc);
 	}
 	else {
-		if (usemsg == 0) {
-			hexchat_commandf(ph, "me %s", out);
-		}
-		else if (usemsg == 1) {
-			hexchat_commandf(ph, "say %s", out);
-		}
-		else {
-			hexchat_printf(ph, "Output: %s\n", out);
-		}
+		hexchat_printf(ph, "Output: %s\n", irc);
 	}
 	return 1;
 }
