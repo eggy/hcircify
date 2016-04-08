@@ -56,15 +56,22 @@ Contact info: mrichards@gmail.com
 #define IRCIFY_CMD "IRCIFY"
 #define APIV_CMD "APIV"
 #define SAVE_CMD "OUTPUT"
+#define PORT_CMD "PORT"
+
 #define PREF_OUTPUT "Output"
 #define PREF_MSG "Type"
+#define PREF_PORT "Port"
 
 #ifdef _WIN64 
-#pragma comment(lib, "./lib/SpotifyLookUpAPI_x64.lib")
+#pragma comment(lib, "./lib/SpotifyLookUpAPIx64.lib")
 
 #else
-#pragma comment(lib, "./lib/SpotifyLookUpAPI.lib")
+#pragma comment(lib, "./lib/SpotifyLookUpAPIx86.lib")
 #endif
+
+static int port_cb(char *word[], char *word_eol[], void *userdata);
+static int spotify_cb(char *word[], char *word_eol[], void *userdata);
+static int advert_ver(char *word[], char *word_eol[], void *userdata);
 
 extern int OutputToIRC(char *out);
 extern int CreateOutput(char *out, TRACKINFO *ti);

@@ -160,6 +160,10 @@ ClientBin/
 *.publishsettings
 node_modules/
 
+#Visual Studio Database Files
+*.VC.opendb
+*.VC.db
+
 # RIA/Silverlight projects
 Generated_Code/
 

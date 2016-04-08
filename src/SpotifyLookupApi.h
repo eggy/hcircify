@@ -82,6 +82,7 @@ void ShuffleToggle();
 
 int GetAlbumArt(TRACKINFO *ti);
 
+int SetConnectPort(int Port);
 
 
 DWORD LookupVersion();

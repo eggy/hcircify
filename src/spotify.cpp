@@ -29,7 +29,9 @@ static char version[] = VER_FILE_VERSION_STR;
 
 static const char helpmsg[] = "Sends currently playing song in Spotify to the current channel. USAGE: /IRCIFY";
 static const char apihelpmsg[] = "Display hcircify version information. USAGE: /APIV";
-static const char prefhpmsg[] = "Configure hcircify output. USAGE: /OUTPUT";
+static const char outputmsg[] = "Configure hcircify output. USAGE: /OUTPUT";
+static const char portmsg[] = "Configure lookup port. USAGE: /PORT";
+
 static const LPCTSTR SPOTIFY_CLASS_NAME = TEXT("SpotifyMainWindow");
 
 DWORD api = LookupVersion();
@@ -38,15 +40,33 @@ static char	SavedOutputStr[500] = { 0 };
 static char	ColorSaveStr[500] = { 0 };
 static char PrefOut[500] = { 0 };
 static int usemsg = 1;
+static int port = NULL;
+
+static int port_cb(char *word[], char *word_eol[], void *userdata) {
+	
+	int tmport = NULL;
+	tmport = SetConnectPort(port);
+
+	hexchat_printf(ph, "%s: Port %i", name, tmport);
+	
+	return HEXCHAT_EAT_ALL;
+}
 
 static int spotify_cb(char *word[], char *word_eol[], void *userdata)
 {
 	HWND hWnd = FindWindow(SPOTIFY_CLASS_NAME, NULL);
 	if(hWnd != NULL)
 	{
+		int loport = SetConnectPort(port);
+		
+		if (loport == NULL) {
+			hexchat_printf(ph, "%s: Contact the developer for support, lookup port did not get set.", name);
+			return 1;
+		}
+
 		TRACKINFO ti = { 0 };
 		memset(&ti, 0, sizeof(TRACKINFO)); //make sure its nulled every time!
-		
+
 		int sngnfo = GetSongInfo(&ti, 1);
 		if (sngnfo == -1){
 			return 1;
@@ -91,7 +111,7 @@ static int output_cb(char *word[], char *word_eol[], void *userdata)
 	}
 	else if (!_stricmp("CONFIG", word[2])) {
 		hexchat_printf(ph, "%s: %s\\addon_hcircify.conf", name, hexchat_get_info(ph, "configdir"));
-		return 1;
+		return HEXCHAT_EAT_ALL;
 	} else if (!_stricmp("SET", word[2])) {
 		usesave = 2;
 		sprintf_s(input, 500, word_eol[3]);
@@ -109,7 +129,7 @@ static int output_cb(char *word[], char *word_eol[], void *userdata)
 		proc_color(input, 1);
 		LoadAndSave(usesave);
 		hexchat_printf(ph, "%s: Wrote all settings to the config.", name);
-		return 1;	
+		return HEXCHAT_EAT_ALL;
 	} else {
 		//Output command help
 		hexchat_printf(ph, "%s: OUTPUT COMMAND USAGE:", name);
@@ -119,25 +139,25 @@ static int output_cb(char *word[], char *word_eol[], void *userdata)
 		hexchat_printf(ph, "%s: /OUTPUT SET <Output>", name);
 		hexchat_printf(ph, "%s: /OUTPUT TYPE <0 or 1>", name);
 		hexchat_printf(ph, "%s: Any modified settings will be automatically be saved upon unlaod/exit.", name);
-		return 1;
+		return HEXCHAT_EAT_ALL;
 	}
 
 	if (usesave == 0)	{
 		//Reload the preferences from the config
 		LoadAndSave(usesave);
 		hexchat_printf(ph, "%s: Reloaded settings from the config.", name);
-		return 1;
+		return HEXCHAT_EAT_ALL;
 	} else if (usesave == 1) {
 		//Save the preferences to config
 		LoadAndSave(usesave);
 		hexchat_printf(ph, "%s: Wrote all settings to the config.", name);
-		return 1;
+		return HEXCHAT_EAT_ALL;
 	 } else {
 		//Preferences changed, but not written to config
 		hexchat_printf(ph, "%s: Settings have been altered in memory but not saved yet.", name);
 		hexchat_printf(ph, "%s: Settings are auto saved on unlaod or exit.", name);
 		hexchat_printf(ph, "%s: You can always manually save by using /OUTPUT SAVE", name);
-		return 1;
+		return HEXCHAT_EAT_ALL;
 	}
 	return HEXCHAT_EAT_ALL;
 }
@@ -161,7 +181,8 @@ int hexchat_plugin_init(hexchat_plugin *plugin_handle, char **plugin_name, char 
 
 	hexchat_hook_command(ph, IRCIFY_CMD, HEXCHAT_PRI_NORM, spotify_cb, helpmsg, 0);
 	hexchat_hook_command(ph, APIV_CMD, HEXCHAT_PRI_NORM, advert_ver, apihelpmsg, 0);
-	hexchat_hook_command(ph, SAVE_CMD, HEXCHAT_PRI_NORM, output_cb, prefhpmsg, 0);
+	hexchat_hook_command(ph, SAVE_CMD, HEXCHAT_PRI_NORM, output_cb, outputmsg, 0);
+	hexchat_hook_command(ph, PORT_CMD, HEXCHAT_PRI_NORM, port_cb, portmsg, 0);
 
 	LoadAndSave(0);
 
@@ -423,6 +444,7 @@ int LoadAndSave(int saved) {
 	// 0 = Load, 1 = Save
 	char buf[500] = { 0 };
 	int prefmsg = 0;
+	int lport = NULL;
 
 	if (!saved) {
 		//Load from the config
@@ -447,6 +469,13 @@ int LoadAndSave(int saved) {
 			usemsg = 1;
 			hexchat_printf(ph, "%s: Message type set to 1, using \"say\" by default.", name);
 		}
+		
+		lport = hexchat_pluginpref_get_int(ph, PREF_PORT);
+		if (lport == -1) {
+			lport = SetConnectPort(NULL);
+			port = lport;
+			hexchat_printf(ph, "%s: Using the default port %i.", name, lport);
+		}
 		return 1;
 	}
 	else {
@@ -458,7 +487,8 @@ int LoadAndSave(int saved) {
 			proc_color(input, 1);
 		}
 		if (!hexchat_pluginpref_set_str(ph, PREF_OUTPUT, PrefOut) ||
-			!hexchat_pluginpref_set_int(ph, PREF_MSG, usemsg))
+			!hexchat_pluginpref_set_int(ph, PREF_MSG, usemsg) ||
+			!hexchat_pluginpref_set_int(ph, PREF_PORT, port) )
 		{
 			hexchat_printf(ph, "%s: failed to save settings", name);
 			return 0;
