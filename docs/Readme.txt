@@ -26,7 +26,8 @@ NOTE: The HexChat port is only available on Windows, due to current API limitati
 	You have installed the wrong version of the DLL; please make sure you have copied the 64bit version of the DLL.
 	
 	If this DLL does not load... 
-	You might need to download & install this: http://www.microsoft.com/en-us/download/details.aspx?id=5555
+	You might need to download & install the Microsoft Visual Studio 2015 Runtimes.
+	However, you should have already installed the required versions to run HexChat on Windows.
 	
 
 2. Usage
@@ -65,6 +66,7 @@ Available tags in the output customizer:
 
 3. CHAGELOG
 ===============
+v1.0.4 - Added the ability to change the Spotify port
 v1.0.3 - Fix the "Private Message" crash reported
 v1.0.2 - Maintenance Release
 v1.0.1 - Fixed Private Mode
