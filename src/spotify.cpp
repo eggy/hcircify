@@ -44,10 +44,17 @@ static int port = NULL;
 
 static int port_cb(char *word[], char *word_eol[], void *userdata) {
 	
-	int tmport = NULL;
-	tmport = SetConnectPort(port);
+	int uport = NULL;
 
-	hexchat_printf(ph, "%s: Port %i", name, tmport);
+	if (!_stricmp("SET", word[2])) {
+		uport = atoi(word[3]);
+		SetConnectPort(uport);
+		hexchat_printf(ph, "%s: Set port to %i", name, uport);
+	} else {
+		uport = SetConnectPort(port);
+		hexchat_printf(ph, "%s: USAGE: /PORT SET <PORT>", name, uport);
+		hexchat_printf(ph, "%s: Current port is %i", name, uport);
+	}
 	
 	return HEXCHAT_EAT_ALL;
 }
