@@ -101,9 +101,9 @@ static int spotify_cb(char *word[], char *word_eol[], void *userdata)
 
 static int advert_ver(char *word[], char *word_eol[], void *userdata){
 	if (usemsg == 0)
-		hexchat_commandf(ph, "me is using %s v%s (Lib:%x-DLL:%s-%s) - Get yours at http://equalify.me/ircify/", name, version, api, GitHash, BuildDate);
+		hexchat_commandf(ph, "me is using %s v%s (Lib:%x-DLL:%s-%s) - Get yours at http://eggy.cc/ircify/", name, version, api, GitHash, BuildDate);
 	else if (usemsg == 1)
-		hexchat_commandf(ph, "say %s v%s (Lib:%x-DLL:%s-%s) - Get yours at http://equalify.me/ircify/", name, version, api, GitHash, BuildDate);
+		hexchat_commandf(ph, "say %s v%s (Lib:%x-DLL:%s-%s) - Get yours at http://eggy.cc/ircify/", name, version, api, GitHash, BuildDate);
 	else
 		hexchat_printf(ph, "%s v%s Lib:%x-DLL:%s-%s", name, version, api, GitHash, BuildDate);
 	return HEXCHAT_EAT_ALL;
