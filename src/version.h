@@ -26,7 +26,7 @@ Contact info: mrichards@gmail.com
 
 #define VERSION_MAJOR 1
 #define VERSION_MINOR 0
-#define VERSION_REVISION 4
+#define VERSION_REVISION 6
 #define VERSION_BUILD VER_BUILD
 
 #define VER_FILE_VERSION VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD
@@ -46,6 +46,6 @@ Contact info: mrichards@gmail.com
 #define VER_PRODUCT_NAME_STR "hcircify"
 #define VER_FILE_DESCRIPTION_STR "Spotify Now Playing plugin for HexChat"
 #define VER_INTERNAL_NAME_STR "hcircify"
-#define VER_COPYRIGHT_STR "Copyright (C) 2015"
+#define VER_COPYRIGHT_STR "Copyright (C) 2017"
 #define VER_PRODUCT_VERSION VER_FILE_VERSION
 #define VER_PRODUCT_VERSION_STR VER_FILE_VERSION_STR

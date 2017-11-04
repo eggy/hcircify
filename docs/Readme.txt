@@ -75,4 +75,4 @@ v0.1 - Private Beta Build
 
 4. Thanks to
 ===============
-	Everyone in #equalify
+	Everyone in IRC
