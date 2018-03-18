@@ -73,12 +73,12 @@ static int port_cb(char *word[], char *word_eol[], void *userdata);
 static int spotify_cb(char *word[], char *word_eol[], void *userdata);
 static int advert_ver(char *word[], char *word_eol[], void *userdata);
 
+extern int SpStatus();
 extern int OutputToIRC(char *out);
 extern int CreateOutput(char *out, TRACKINFO *ti);
-extern int internalsong(TRACKINFO *ti);
+
 extern int convert_time(char *out, int sec);
 extern int proc_color(char *color, int reverse);
 extern int LoadAndSave(int saved);
 
-extern char* _UTF16ToUTF8(wchar_t * pszTextUTF16);
 #endif
