@@ -73,7 +73,7 @@ static int port_cb(char *word[], char *word_eol[], void *userdata);
 static int spotify_cb(char *word[], char *word_eol[], void *userdata);
 static int advert_ver(char *word[], char *word_eol[], void *userdata);
 
-extern int SpStatus();
+extern int chkStatus();
 extern int OutputToIRC(char *out);
 extern int CreateOutput(char *out, TRACKINFO *ti);
 

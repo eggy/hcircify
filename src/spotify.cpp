@@ -40,13 +40,35 @@ static char PrefOut[500] = { 0 };
 static int usemsg = 1;
 static int port = NULL;
 
-static int port_cb(char *word[], char *word_eol[], void *userdata) {
-	
-	int uport = NULL;
+int chkStatus(TRACKINFO &ti)
+{
+	if (ti.SpInfo.Running == 1) {
+		if (ti.SpInfo.Playing == 1) {
+			return 1; //playing
+		}
+		else {
+			return 2; //paused
+		}
+	}
+	else {
+		return 0; //spotify not running
+	}
+	return -1; //This should never happen
+}
 
+static int port_cb(char *word[], char *word_eol[], void *userdata) {
+
+	if (port == NULL) {
+		hexchat_printf(ph, "%s: Contact the developer for support..", name);
+		return HEXCHAT_EAT_ALL;
+	}
+
+	int uport = NULL;
 	if (!_stricmp("SET", word[2])) {
 		uport = atoi(word[3]);
 		SetConnectPort(uport);
+		port = uport;
+		LoadAndSave(1);
 		hexchat_printf(ph, "%s: Set port to %i", name, uport);
 	} else {
 		uport = SetConnectPort(port);
@@ -59,13 +81,13 @@ static int port_cb(char *word[], char *word_eol[], void *userdata) {
 
 static int spotify_cb(char *word[], char *word_eol[], void *userdata)
 {
-	int s = SpStatus();
+	TRACKINFO ti = { 0 };
+	memset(&ti, 0, sizeof(TRACKINFO)); //make sure its nulled every time!
+	int sngnfo = GetSongInfo(&ti, 1);
+
+	int s = chkStatus(ti);
 	if(s == 1)
 	{
-		TRACKINFO ti = { 0 };
-		memset(&ti, 0, sizeof(TRACKINFO)); //make sure its nulled every time!
-
-		int sngnfo = GetSongInfo(&ti, 1);
 		if (sngnfo == -1){
 			return 1;
 		}
@@ -203,29 +225,6 @@ int hexchat_plugin_deinit(hexchat_plugin *plugin_handle)
 	return 1;
 }
 
-int SpStatus()
-{
-	if (port == NULL) {
-		hexchat_printf(ph, "%s: Contact the developer for support, lookup port did not get set.", name);
-		return 1;
-	}
-
-	TRACKINFO ti = { 0 };
-	GetSongInfo(&ti, 0);
-
-	if (ti.SpInfo.Running == 1) {
-		if (ti.SpInfo.Playing == 1) {
-			return 1; //playing
-		}
-		else {
-			return 2; //paused
-		}
-	}
-	else {
-		return 0; //spotify not running
-	}
-	return -1; //This should never happen
-}
 
 int OutputToIRC(char *out) {
 	char *irc;
@@ -493,11 +492,15 @@ int LoadAndSave(int saved) {
 		if (lport == -1) {
 			lport = SetConnectPort(NULL);
 			port = lport;
-			hexchat_printf(ph, "%s: Using the default port %i.", name, lport);
+			hexchat_printf(ph, "%s: No cusom port set, using the default port %i.", name, port);
+		}
+		else {
+			SetConnectPort(lport);
+			port = lport;
+			hexchat_printf(ph, "%s: Using port %i.", name, port);
 		}
 		return 1;
-	}
-	else {
+	}	else {
 		//Save to the config
 		if (strlen(ColorSaveStr) == 0){
 			sprintf_s(PrefOut, 500, input);
