@@ -32,8 +32,6 @@ static const char apihelpmsg[] = "Display hcircify version information. USAGE: /
 static const char outputmsg[] = "Configure hcircify output. USAGE: /OUTPUT";
 static const char portmsg[] = "Configure lookup port. USAGE: /PORT";
 
-static const LPCTSTR SPOTIFY_CLASS_NAME = TEXT("SpotifyMainWindow");
-
 DWORD api = LookupVersion();
 static char input[500] = { 0 }; //"nP: .song. - (.artist. (.album.)) - [.pbar.] .uri.";
 static char	SavedOutputStr[500] = { 0 };
