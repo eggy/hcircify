@@ -40,10 +40,10 @@ static char PrefOut[500] = { 0 };
 static int usemsg = 1;
 static int port = NULL;
 
-int chkStatus(TRACKINFO &ti)
+int chkStatus(TRACKINFO &t)
 {
-	if (ti.SpInfo.Running == 1) {
-		if (ti.SpInfo.Playing == 1) {
+	if (t.SpInfo.Running == 1) {
+		if (t.SpInfo.Playing == 1) {
 			return 1; //playing
 		}
 		else {
@@ -67,9 +67,14 @@ static int port_cb(char *word[], char *word_eol[], void *userdata) {
 	if (!_stricmp("SET", word[2])) {
 		uport = atoi(word[3]);
 		SetConnectPort(uport);
-		port = uport;
-		LoadAndSave(1);
 		hexchat_printf(ph, "%s: Set port to %i", name, uport);
+		
+		if (!hexchat_pluginpref_set_int(ph, PREF_PORT, uport))
+		{
+			hexchat_printf(ph, "%s: failed to save port setting.", name);
+			return HEXCHAT_EAT_ALL;
+		}
+
 	} else {
 		uport = SetConnectPort(port);
 		hexchat_printf(ph, "%s: USAGE: /PORT SET <PORT>", name, uport);
@@ -86,13 +91,17 @@ static int spotify_cb(char *word[], char *word_eol[], void *userdata)
 	int sngnfo = GetSongInfo(&ti, 1);
 
 	int s = chkStatus(ti);
-	if(s == 1)
+	if (s < 1)
+		return HEXCHAT_EAT_ALL;
+	else if(s == 1)
 	{
 		if (sngnfo == -1){
-			return 1;
+			return HEXCHAT_EAT_ALL;
 		}
-		if (ti.tracktype == 2) return 1;
 
+		if (ti.tracktype == 2) {
+			return HEXCHAT_EAT_ALL;
+		}
 		if ((ti.tracktype == 0) || (ti.tracktype == 1) || (ti.SpInfo.Playing == 1)) {
 			proc_color(input, 0);
 			CreateOutput(ColorSaveStr, &ti);
