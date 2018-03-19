@@ -91,10 +91,11 @@ static int spotify_cb(char *word[], char *word_eol[], void *userdata)
 	int sngnfo = GetSongInfo(&ti, 1);
 
 	int s = chkStatus(&ti);
-	if (s < 1)
+	if (s < 1) {
+		hexchat_printf(ph, "%s: Spotify is not running.", name);
 		return HEXCHAT_EAT_ALL;
-	else if(s == 1)
-	{
+	} 
+	else if(s == 1) {
 		if (sngnfo == -1){
 			return HEXCHAT_EAT_ALL;
 		}
@@ -111,9 +112,8 @@ static int spotify_cb(char *word[], char *word_eol[], void *userdata)
 	else if (s == 2) {
 		hexchat_printf(ph, "%s: Spotify is paused.", name);
 	}
-	else
-	{
-		hexchat_printf(ph, "%s: Spotify is not running.", name);
+	else {
+		hexchat_printf(ph, "%s: Contact the developer, API returned status %i", name, s);
 	}
 	return HEXCHAT_EAT_ALL;
 }
