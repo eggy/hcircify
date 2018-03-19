@@ -40,10 +40,10 @@ static char PrefOut[500] = { 0 };
 static int usemsg = 1;
 static int port = NULL;
 
-int chkStatus(TRACKINFO &t)
+int chkStatus(TRACKINFO *t)
 {
-	if (t.SpInfo.Running == 1) {
-		if (t.SpInfo.Playing == 1) {
+	if (t->SpInfo.Running == 1) {
+		if (t->SpInfo.Playing == 1) {
 			return 1; //playing
 		}
 		else {
@@ -90,11 +90,12 @@ static int spotify_cb(char *word[], char *word_eol[], void *userdata)
 	memset(&ti, 0, sizeof(TRACKINFO)); //make sure its nulled every time!
 	int sngnfo = GetSongInfo(&ti, 1);
 
-	int s = chkStatus(ti);
-	if (s < 1)
+	int s = chkStatus(&ti);
+	if (s < 1) {
+		hexchat_printf(ph, "%s: Spotify is not running.", name);
 		return HEXCHAT_EAT_ALL;
-	else if(s == 1)
-	{
+	} 
+	else if(s == 1) {
 		if (sngnfo == -1){
 			return HEXCHAT_EAT_ALL;
 		}
@@ -111,9 +112,8 @@ static int spotify_cb(char *word[], char *word_eol[], void *userdata)
 	else if (s == 2) {
 		hexchat_printf(ph, "%s: Spotify is paused.", name);
 	}
-	else
-	{
-		hexchat_printf(ph, "%s: Spotify is not running.", name);
+	else {
+		hexchat_printf(ph, "%s: Contact the developer, API returned status %i", name, s);
 	}
 	return HEXCHAT_EAT_ALL;
 }
@@ -214,8 +214,9 @@ int hexchat_plugin_init(hexchat_plugin *plugin_handle, char **plugin_name, char 
 
 	hexchat_command(ph, "MENU ADD \"Ircify\"");
 	hexchat_command(ph, "MENU ADD \"Ircify/Ircify\" \"IRCIFY\"");
+	hexchat_command(ph, "MENU ADD \"Ircify/Unload\" \"UNLOAD hcircify\"");
 	hexchat_command(ph, "MENU ADD \"Ircify/-");
-	hexchat_command(ph, "MENU ADD \"Ircify/About\" \"APIV\"");
+	hexchat_command(ph, "MENU ADD \"Ircify/About\" \"APIV\""); 
 
 	hexchat_printf(ph, "%s v%s (Lib:%x-DLL:%s-%s) loaded", name, version, api, GitHash, BuildDate);
 
